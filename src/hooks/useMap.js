@@ -1,12 +1,22 @@
-import mapboxgl, { Map, NavigationControl } from 'mapbox-gl';
-import { useEffect, useRef, useState } from 'react'
+import mapboxgl, { Map, NavigationControl, Marker } from 'mapbox-gl';
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { v4 } from "uuid"
 
 mapboxgl.accessToken = process.env.REACT_APP_TOKEN_MAPBOX;
 
 export const useMap = ( initialPoint ) => {
    const mapContainer = useRef()
+   const marcadores = useRef( {} )
    const [ coords, setCoords ] = useState( initialPoint )
-   const [ mapa, setMapa ] = useState( null )
+   const mapa = useRef()
+
+   const addMarker = useCallback( ( { lngLat } ) => {
+      const { lng, lat } = lngLat
+      const marker = new Marker()
+      marker.id = v4()
+      marker.setLngLat( [ lng, lat ] ).addTo( mapa.current ).setDraggable( true )
+      marcadores.current[ marker.id ] = marker
+   } , [] ) 
 
    useEffect( () => {
       const map = new Map({
@@ -17,21 +27,26 @@ export const useMap = ( initialPoint ) => {
       });
 
       map.addControl( new NavigationControl() );
-
-      setMapa( map )
+      mapa.current = map
+      // setMapa( map )
    }, [] )
 
    useEffect( () => {
-      mapa?.on( "move", (some) => {
-         // console.log( some );
-         setCoords( { ... mapa.getCenter(), zoom: mapa.getZoom() } )
-         
+      mapa?.current?.on( "move", (some) => {
+         setCoords( { ... mapa.current.getCenter(), zoom: mapa.current.getZoom() } )
       } )
-   }, [ mapa ] )
+   }, [] )
+
+   useEffect( () => {
+      mapa.current?.on( "click", addMarker )
+   
+   }, [addMarker] )
 
    return {
       coords,
       mapContainer,
-      mapa,
+      marcadores,
+      mapa: mapa.current,
+      addMarker,
    }
 }
