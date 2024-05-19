@@ -1,15 +1,28 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useMap } from "../hooks/useMap"
 
 const initialPoint = {
-   lng: 29.65,
-   lat: -110.7112,
-   zoom: 6
+   lng: 29.0965,
+   lat: -110.9910,
+   zoom: 15
 }
 
 export const MapPage = () => {
-   const { coords, mapContainer, } = useMap( initialPoint )
-      
+   const { coords, mapContainer, newMarker$, moveMarker$ } = useMap( initialPoint )
+   
+   useEffect( () => {
+      newMarker$.subscribe( mkr => {
+         // console.log( mkr );
+      } )
+   }, [ newMarker$ ] )
+
+   useEffect( () => {
+      moveMarker$.subscribe( mkr => {
+         // console.log( mkr.id );
+      } )
+   }, [ moveMarker$ ] )
+
+
    return <>
       <div className='infoPoint'>
          Latitud: { coords.lat.toFixed( 4 ) } | 
