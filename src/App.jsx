@@ -1,9 +1,10 @@
+import { MapPage } from "./pages/MapPage"
 
 function App() {
-  
+
   return (
     <>
-      Hello World !!!
+      <MapPage />
     </>
   )
 }
